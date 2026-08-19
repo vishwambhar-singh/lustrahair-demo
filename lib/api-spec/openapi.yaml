@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: try-on
+    description: Virtual hair try-on preview operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /try-on:
+    post:
+      operationId: generateTryOn
+      tags: [try-on]
+      summary: Generate a hairstyle try-on preview
+      description: Returns a simulated preview or a provider-backed preview when configured.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TryOnInput"
+      responses:
+        "200":
+          description: Generated preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TryOnResult"
+        "400":
+          description: Invalid try-on request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +60,41 @@ components:
           type: string
       required:
         - status
+    TryOnInput:
+      type: object
+      properties:
+        imageData:
+          type: string
+          minLength: 1
+        style:
+          type: string
+          minLength: 1
+        color:
+          type: string
+          minLength: 1
+      required:
+        - imageData
+        - style
+        - color
+    TryOnResult:
+      type: object
+      properties:
+        previewImage:
+          type: string
+        mode:
+          type: string
+          enum: [simulation, provider]
+        message:
+          type: string
+      required:
+        - previewImage
+        - mode
+        - message
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 

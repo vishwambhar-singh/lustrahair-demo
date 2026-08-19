@@ -1,0 +1,137 @@
+Build and deploy a full-stack responsive web application called “LustraHair” — an AI-powered virtual hair try-on experience for a premium hair e-commerce brand.
+
+Important: Do not clone or imitate any existing hair brand website. Create an original, premium, light-theme beauty e-commerce experience.
+
+Tech stack:
+- Next.js with TypeScript and App Router
+- Tailwind CSS
+- Lucide icons
+- Use local state only; no database needed
+- Ensure it runs correctly in Replit and is deployable
+- Create a clear README.md explaining setup, architecture, AI approach, limitations, and production roadmap
+
+Core user journey:
+Discover → Upload Photo → Choose Look → Generate Try-On → Compare Result → View Product → Take Action
+
+Design direction:
+- Light theme only
+- Premium, clean, editorial beauty aesthetic
+- Soft ivory / white background, subtle warm beige and muted rose accents
+- Dark charcoal text
+- Strong typography, generous whitespace, refined cards, soft shadows
+- Fully responsive, especially excellent on mobile
+- Avoid generic dashboards and developer-tool appearance
+- Use polished loading, hover, selection, disabled, error, and success states
+- Accessible labels, keyboard-friendly controls, semantic structure, visible focus states
+
+Build these sections/features:
+
+1. Landing / hero
+- Brand name: LustraHair
+- Navigation with logo, “How it works”, “Collections”, and “Try on”
+- Hero headline: “See your next look before you buy.”
+- Supporting text explaining photo upload and realistic hairstyle previews
+- Primary CTA: “Try it now”
+- Secondary trust points: private photo handling, tailored previews, premium human hair
+- Add a tasteful original hero visual/illustration using CSS or royalty-free image URLs if available
+
+2. Try-on studio
+Create a polished multi-step experience with visible progress:
+Step 1: Upload photo
+Step 2: Choose your look
+Step 3: Preview your transformation
+
+Photo upload:
+- Drag-and-drop upload area plus file-picker button
+- Accept JPG, JPEG, PNG, WEBP
+- Max file size 10 MB
+- Show helpful validation errors for wrong file type, oversized files, failed image load, etc.
+- Show image preview after upload
+- Include a “Use demo photo” option so evaluators can experience the flow without uploading
+- Include privacy reassurance copy
+- Allow replacing/removing image
+
+Look selection:
+- At least 6 meaningful hairstyle choices:
+  1. Signature Waves
+  2. Sleek Length
+  3. Soft Curls
+  4. Modern Bob
+  5. Feathered Layers
+  6. Curtain Bangs
+- Include at least 4 colour options:
+  Black, Dark Brown, Chestnut, Honey Blonde
+- Each style should have a visual thumbnail/card, name, short description, and selection state
+- Make it obvious what the user is selecting and what will be generated
+- Include a selected-look summary before generating
+
+Try-on generation:
+- Main CTA: “Generate my look”
+- Clicking it triggers a polished 3–5 second simulated processing state with stages such as:
+  “Analysing your photo”
+  “Mapping natural hairline”
+  “Creating your LustraHair preview”
+- Add cancel/back behavior where appropriate
+- Build the app so a real AI API can be inserted later through a single server endpoint such as /api/try-on
+
+AI implementation approach:
+- Implement a server route /api/try-on.
+- If an environment variable for a real image generation API is present, leave a clean adapter/service structure ready for it.
+- Since no API key may be available, implement a high-quality prototype fallback:
+  - Return a generated preview based on the uploaded/demo image and selected style/color.
+  - Make this visually meaningful using client-side compositing/effects or prepared hairstyle assets.
+  - Do not claim this fallback is photorealistic AI.
+  - In the UI, label this carefully as “Preview simulation” when fallback mode is active.
+- Keep the API abstraction clean and document exactly how to connect a production image-to-image AI provider later.
+
+Results page:
+- Show original and transformed image side by side on desktop
+- On mobile, provide an interactive before/after image comparison slider
+- Also include a comparison slider on desktop if possible
+- Label “Before” and “Your new look”
+- Show selected hairstyle and colour
+- Buttons:
+  - “Try another look”
+  - “Save this look”
+  - “Share”
+- Save Look can show a toast and save into browser localStorage
+- Share should use Web Share API when supported and gracefully fall back to copying a link/message
+- Add a tasteful toast notification system
+
+Product-commerce connection:
+Below or alongside the result, display a relevant product card:
+- Product name dynamically changes with selected style, e.g. “LustraHair Signature Waves”
+- Subtitle: “Premium Remy Human Hair Collection”
+- Price: ₹12,999
+- Colour availability chips
+- Product benefits: seamless blend, heat style friendly, salon-quality density
+- Primary action: “Add to bag”
+- Secondary action: “Book a free colour match”
+- Both actions should work as demo actions with success feedback/toasts
+- Add a small “Why LustraHair?” trust section
+
+Engineering quality:
+- Organize components clearly, e.g. Hero, UploadStep, LookSelector, ProcessingState, ResultComparison, ProductCard, Toast
+- Keep types clean and avoid large monolithic files
+- Add reusable constants for styles/products/colors
+- Handle loading, empty, error, upload validation, and fallback states
+- No broken links or placeholder controls
+- Include a demo image or create an elegant demo-photo state that works without external setup
+- Do not require a database or secrets for the prototype fallback
+
+README must include:
+- Project overview
+- Feature list
+- Tech stack
+- How to run locally
+- How to deploy
+- AI architecture and current fallback behavior
+- How to connect a real AI try-on/image-to-image provider
+- Known limitations
+- Privacy considerations for uploaded images
+- Production roadmap: secure image storage, consent, image deletion, moderation, queueing, observability, analytics, model evaluation, and real product integration
+
+Before finishing:
+- Test the full path from landing page to upload/demo photo to selecting a look to generation to comparison and add-to-bag action.
+- Ensure the app starts successfully.
+- Make the final experience visually polished and presentation-ready.

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "LustraHair Virtual Try-On"
+description = "A premium AI-powered virtual hair try-on experience for discovering, previewing, and shopping personalized LustraHair looks."
+version = "1.0.0"
+id = "artifacts/lustrahair"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20977
+
+[services.development]
+run = "pnpm --filter @workspace/lustrahair run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lustrahair", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lustrahair/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20977"
+BASE_PATH = "/"
