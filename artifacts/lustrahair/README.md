@@ -1,95 +1,90 @@
 # LustraHair Virtual Try-On
 
-LustraHair is a responsive, premium beauty-commerce prototype that lets a shopper upload a photo, choose a hairstyle and colour, preview the result, compare it with the original, and take the next commerce action.
+A customer-facing light-theme try-on for the fictional brand **LustraHair**. The shopper journey is:
+
+Discover → Upload photo → Choose look & colour → Generate preview → Compare before/after → Product action
+
+## Why this exists
+
+Online hair shoppers cannot tell how a wig, topper, or clip-in will sit on their face. This prototype reduces that uncertainty so they can choose a silhouette and colour with more confidence, then add to bag or request a consultation.
 
 ## Features
 
-- Editorial light-theme landing page with a responsive mobile menu
-- Three-step try-on studio: upload, choose, preview
-- Drag-and-drop and file-picker upload for JPG, JPEG, PNG, and WEBP files up to 10 MB
-- Demo photo mode for evaluator-friendly, no-setup exploration
-- Male/female presentation choice that changes the hairline, volume, taper, length, and strand overlay
-- Six looks and four colour choices with selected-look summary
-- Staged processing state and honest `Preview simulation` labelling
-- Before/after comparison slider on every viewport
-- Save to browser localStorage, Web Share API support, and clipboard fallback
-- Dynamic product card with INR pricing, benefits, add-to-bag feedback, and colour-match feedback
-- Accessible labels, keyboard-friendly controls, visible focus states, error toasts, and responsive layouts
+- Premium light-theme landing page and mobile menu
+- Upload (JPG / PNG / WEBP, 10MB) with drag-and-drop, replace/remove, and invalid-file toasts
+- One-click demo portrait so reviewers can evaluate without uploading
+- Six silhouettes and four colours (Black, Dark Brown, Chestnut, Honey Blonde)
+- Identity-preserving preview: face stays the original photo; hair is photographed strand texture, not a flat colour film
+- Live colour change on the result, keeping highlights and shadows
+- Before/after slider, save look, share, add to bag, request consultation, try another look
 
 ## Tech stack
 
-- React + TypeScript + Vite
-- Tailwind CSS
-- Lucide React icons
-- Wouter for the lightweight route shell
-- TanStack Query and the generated API client
-- Express API server with OpenAPI-generated Zod validation
-- Local state only; no database or secrets are required for the prototype
+- React 19 + TypeScript + Vite 7
+- Tailwind CSS 4
+- Wouter, TanStack Query, generated OpenAPI client
+- Express 5 API with Zod validation (`POST /api/try-on`)
+
+## AI / image approach
+
+This assignment does not require training a model. The 18-hour trade-off is a **two-layer preview** that keeps identity on-device:
+
+1. **Demo portrait (the path reviewers will use first)**  
+   Identity-preserving AI image edits of the same woman were generated per silhouette (waves, sleek, curls, bob, layers, bangs). The result canvas shows that photographic hair on the original lighting, then **recolours only hair pixels** while protecting skin, lips, teeth, and the red knit. That is why colour changes look like dye, not a brown overlay.
+
+2. **Any uploaded photo**  
+   Photographed hair overlays (transparent strand maps) are aligned to the head, the face opening is punched out so eyes and identity remain, and the same luminosity-preserving dye is applied.
+
+3. **API contract**  
+   `POST /api/try-on` validates `imageData`, `style`, `color`, and `gender`. Today it returns `mode: "simulation"` so a production image-to-image provider (Gemini / Flux / a virtual-try-on API) can be swapped in behind the same schema without changing the UI.
+
+This is deliberately not a cartoon SVG mask. It is also not a live GPU model in the browser. The README is honest about that so the product can grow into a queued provider without misleading shoppers.
 
 ## Run locally
 
-From the workspace root:
+From the inner workspace (`LustraHair-Virtual-Try-On/`):
 
 ```bash
-pnpm install
+pnpm install --ignore-scripts
 ```
 
-Run the API and frontend using the configured Replit workflows, or locally with the environment variables supplied by the artifact workflow:
+On Windows, `PORT` and `BASE_PATH` are required by Vite:
 
-```bash
-pnpm --filter @workspace/api-server run dev
-pnpm --filter @workspace/lustrahair run dev
+```powershell
+$env:PORT="5000"; $env:NODE_ENV="development"; pnpm --filter @workspace/api-server run build
+$env:PORT="5000"; $env:NODE_ENV="development"; pnpm --filter @workspace/api-server run start
+
+$env:PORT="5173"; $env:BASE_PATH="/"; pnpm --filter @workspace/lustrahair run dev
 ```
 
-The API endpoint is `POST /api/try-on`. The frontend calls it through the shared proxy using the generated `useGenerateTryOn` hook.
+Open http://localhost:5173/
+
+Use **Use our demo photo instead**, pick a look and colour, then **Generate preview**. Drag the slider and switch colours on the result.
+
+## Key technical decisions
+
+- Keep face pixels from the shopper photo; never cover the face with a solid shape.
+- Recolour hair with luminance (highlights stay highlights).
+- Validate try-on input on the server even when generation is client-side, so a provider can drop in later.
+- Small catalogue, polished journey — not a fake checkout or admin dashboard.
+
+## Known limitations
+
+- Uploaded photos use hair overlays rather than a full inpainting model, so unusual poses may misalign.
+- Demo commerce actions do not create real orders.
+- Images stay in browser memory for the session.
+- Production should add moderation, consent, short-lived storage, queues, and a real image-to-image provider.
+
+## Production next steps
+
+1. Provider adapter in `artifacts/api-server/src/routes/try-on.ts` using a secret API key.
+2. Return `mode: "provider"` only after a successful generation.
+3. Consent, deletion, encryption, and moderation.
+4. Queue + progress events for 10–30s generations.
+5. Real catalogue, inventory, and checkout.
 
 ## Deploy
-
-The app is configured as a deployable React/Vite artifact. Use Replit's Publish flow after confirming the preview. The static frontend is built with:
 
 ```bash
 pnpm --filter @workspace/lustrahair run build
 ```
-
-## AI architecture
-
-The client sends `imageData`, `style`, `color`, and `gender` (`male` or `female`) to `POST /api/try-on`. The API validates the request with the OpenAPI-generated `GenerateTryOnBody` schema and returns:
-
-- `previewImage`: the image to render
-- `mode`: `simulation` or `provider`
-- `message`: a user-facing status message
-
-With no provider configured, the current fallback returns the uploaded/demo image and the client presents a gender- and style-specific strand-rendered hair overlay over the head in the comparison treatment. This is a meaningful visual prototype, but is intentionally not described as photorealistic AI.
-
-To connect a production image-to-image provider:
-
-1. Add the provider SDK or server-side HTTP adapter to `artifacts/api-server`.
-2. Store provider credentials in Replit Secrets; never expose them to the browser.
-3. Add the provider request/response mapping inside `src/routes/try-on.ts` or a focused service module.
-4. Keep the public contract unchanged: accept the validated `TryOnInput` shape and return `TryOnResult`.
-5. Set `TRY_ON_PROVIDER_URL` (or the provider-specific configuration used by the adapter) and return `mode: "provider"` only after a successful provider response.
-6. Add moderation, timeout, retry, and queue behavior before handling real user traffic.
-
-## Known limitations
-
-- The fallback does not transform hair pixels or claim photorealistic results.
-- Uploads are held in browser memory for the current session; there is no persistent image storage.
-- Save is local to the current browser/device, and the demo commerce actions do not create real orders.
-- A production model may need background processing rather than a synchronous request.
-
-## Privacy considerations
-
-The prototype does not persist uploaded images to a database. A production implementation should obtain explicit consent, clearly describe provider processing, delete source and generated images on a defined schedule, encrypt data in transit and at rest, and avoid sending images to a model provider without the user's knowledge.
-
-The built-in demo uses a local real-person portrait asset so the experience can be evaluated without uploading a photo. Replace that asset with a properly licensed brand-owned image before production.
-
-## Production roadmap
-
-1. Secure image storage with short-lived access URLs and automatic deletion.
-2. Consent records, age/eligibility checks, privacy policy, and regional data controls.
-3. Image moderation and safety review for uploads and generated results.
-4. Queue-backed generation with progress events, cancellation, retries, and rate limits.
-5. Observability for latency, provider failures, queue depth, and model quality.
-6. Product analytics for look selection, conversion, saves, and colour-match requests.
-7. Model evaluation against diverse hair textures, skin tones, lighting, and image quality.
-8. Real product catalog, inventory, checkout, shipping, and customer support integrations.
