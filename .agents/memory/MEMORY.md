@@ -1,0 +1,1 @@
+- [LustraHair AI boundary](lustrahair-ai-boundary.md) — keep the prototype simulation honest and provider-neutral behind one validated try-on endpoint.

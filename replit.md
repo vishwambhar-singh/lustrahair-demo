@@ -1,15 +1,16 @@
-# [Project name]
+# LustraHair Virtual Try-On
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An editorial beauty-commerce experience that lets shoppers preview hairstyles and colours before buying.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/lustrahair run dev` — run the LustraHair frontend
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- No database or secrets are required for the LustraHair prototype fallback.
 
 ## Stack
 
@@ -22,19 +23,26 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/lustrahair/src/App.tsx` — interactive landing page and try-on studio
+- `artifacts/lustrahair/src/index.css` — LustraHair theme, typography, motion, and global styles
+- `artifacts/lustrahair/README.md` — setup, AI adapter notes, limitations, and production roadmap
+- `artifacts/api-server/src/routes/try-on.ts` — validated `/api/try-on` simulation endpoint
+- `lib/api-spec/openapi.yaml` — source-of-truth API contract
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first release is local-state only so the full shopper journey works without account, database, or provider setup.
+- The try-on route keeps a stable provider-neutral contract; the fallback is explicitly labelled a simulation rather than photorealistic AI.
+- Uploaded and generated image bytes are not persisted; production storage, consent, deletion, moderation, and queueing are documented as roadmap items.
+- The frontend uses the generated API client so a real image-to-image provider can be introduced behind one server boundary.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+LustraHair helps a shopper move from inspiration to confident purchase: choose a photo or demo, select from six hairstyles and four colours, generate a preview, compare before/after, save/share the look, and take a commerce action.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The user requested an original premium light-theme beauty experience, not a clone of an existing hair brand.
 
 ## Gotchas
 
