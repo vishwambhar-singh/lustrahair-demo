@@ -9,5 +9,6 @@
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './tryOnInput';
+export * from './tryOnInputGender';
 export * from './tryOnResult';
 export * from './tryOnResultMode';

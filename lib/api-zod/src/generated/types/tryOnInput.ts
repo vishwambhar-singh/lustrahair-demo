@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { TryOnInputGender } from './tryOnInputGender';
 
 export interface TryOnInput {
   /** @minLength 1 */
@@ -13,4 +14,5 @@ export interface TryOnInput {
   style: string;
   /** @minLength 1 */
   color: string;
+  gender: TryOnInputGender;
 }

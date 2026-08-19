@@ -8,6 +8,7 @@ LustraHair is a responsive, premium beauty-commerce prototype that lets a shoppe
 - Three-step try-on studio: upload, choose, preview
 - Drag-and-drop and file-picker upload for JPG, JPEG, PNG, and WEBP files up to 10 MB
 - Demo photo mode for evaluator-friendly, no-setup exploration
+- Male/female presentation choice that changes the hairline, volume, taper, length, and strand overlay
 - Six looks and four colour choices with selected-look summary
 - Staged processing state and honest `Preview simulation` labelling
 - Before/after comparison slider on every viewport
@@ -52,13 +53,13 @@ pnpm --filter @workspace/lustrahair run build
 
 ## AI architecture
 
-The client sends `imageData`, `style`, and `color` to `POST /api/try-on`. The API validates the request with the OpenAPI-generated `GenerateTryOnBody` schema and returns:
+The client sends `imageData`, `style`, `color`, and `gender` (`male` or `female`) to `POST /api/try-on`. The API validates the request with the OpenAPI-generated `GenerateTryOnBody` schema and returns:
 
 - `previewImage`: the image to render
 - `mode`: `simulation` or `provider`
 - `message`: a user-facing status message
 
-With no provider configured, the current fallback returns the uploaded/demo image and the client presents it as a preview simulation with a comparison treatment. This is intentionally not described as photorealistic AI.
+With no provider configured, the current fallback returns the uploaded/demo image and the client presents a gender- and style-specific strand-rendered hair overlay over the head in the comparison treatment. This is a meaningful visual prototype, but is intentionally not described as photorealistic AI.
 
 To connect a production image-to-image provider:
 

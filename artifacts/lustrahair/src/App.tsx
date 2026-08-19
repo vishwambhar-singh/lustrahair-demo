@@ -48,6 +48,7 @@ const DEMO_IMAGE = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
 </svg>`)}`;
 
 type Look = { id: string; name: string; note: string; cut: string; texture: string };
+type Gender = 'female' | 'male';
 const looks: Look[] = [
   { id: 'waves', name: 'Signature Waves', note: 'Soft movement, unmistakably you.', cut: 'Long', texture: 'Wavy' },
   { id: 'sleek', name: 'Sleek Length', note: 'Polished from every angle.', cut: 'Long', texture: 'Straight' },
@@ -62,6 +63,10 @@ const colours = [
   { name: 'Chestnut', hex: '#86584a' },
   { name: 'Honey Blonde', hex: '#c89558' },
 ];
+
+function hairHex(colour: string) {
+  return colours.find((item) => item.name === colour)?.hex ?? '#49322b';
+}
 
 function Logo({ light = false }: { light?: boolean }) {
   return (
@@ -214,7 +219,7 @@ function UploadPanel({ image, onImage, onError, onNext }: { image: string | null
   </div>;
 }
 
-function LookPanel({ selectedLook, setSelectedLook, selectedColour, setSelectedColour, onBack, onGenerate }: { selectedLook: Look; setSelectedLook: (look: Look) => void; selectedColour: string; setSelectedColour: (colour: string) => void; onBack: () => void; onGenerate: () => void }) {
+function LookPanel({ gender, setGender, selectedLook, setSelectedLook, selectedColour, setSelectedColour, onBack, onGenerate }: { gender: Gender; setGender: (gender: Gender) => void; selectedLook: Look; setSelectedLook: (look: Look) => void; selectedColour: string; setSelectedColour: (colour: string) => void; onBack: () => void; onGenerate: () => void }) {
   return <div className="mx-auto max-w-5xl">
     <div className="mb-9 text-center">
       <p className="mb-3 text-[10px] font-semibold uppercase tracking-[.23em] text-[#b66f78]">Your edit starts here</p>
@@ -223,6 +228,20 @@ function LookPanel({ selectedLook, setSelectedLook, selectedColour, setSelectedC
     </div>
     <div className="grid gap-10 lg:grid-cols-[1fr_260px]">
       <div>
+        <div className="mb-8 rounded-2xl border border-[#e2d6d0] bg-[#fcfaf7] p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div><p className="text-[11px] font-semibold uppercase tracking-[.18em] text-[#5a4342]">Who are we styling?</p><p className="mt-1 text-xs text-[#9b8983]">This helps place the hairline and volume naturally.</p></div>
+            <span className="rounded-full bg-[#f5e4df] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[#a3636b]">Required</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {([{ id: 'female', label: 'Female', detail: 'Longer movement + framing' }, { id: 'male', label: 'Male', detail: 'Shorter structure + taper' }] as const).map((option) => (
+              <button key={option.id} onClick={() => setGender(option.id)} className={`rounded-xl border p-4 text-left transition ${gender === option.id ? 'border-[#b66f78] bg-[#f8e7e2] shadow-[0_8px_20px_rgba(182,111,120,.1)]' : 'border-[#e2d6d0] bg-white hover:border-[#caa6a0]'}`} data-testid={`button-gender-${option.id}`}>
+                <span className="flex items-center justify-between"><span className="text-sm font-semibold text-[#4a3538]">{option.label}</span><span className={`h-3 w-3 rounded-full border ${gender === option.id ? 'border-[#b66f78] bg-[#b66f78] ring-4 ring-[#f2d8d2]' : 'border-[#bda8a1]'}`} /></span>
+                <span className="mt-2 block text-[11px] text-[#9b8983]">{option.detail}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {looks.map((look, index) => <button key={look.id} onClick={() => setSelectedLook(look)} className={`group relative overflow-hidden rounded-2xl border text-left transition duration-300 hover:-translate-y-1 ${selectedLook.id === look.id ? 'border-[#b66f78] bg-[#f6e5df] shadow-[0_10px_28px_rgba(182,111,120,.13)]' : 'border-[#e2d6d0] bg-[#fcfaf7] hover:border-[#caa6a0]'}`} data-testid={`button-look-${look.id}`}>
             <div className={`relative h-36 overflow-hidden ${['bg-[#d9beb4]', 'bg-[#d7c3b4]', 'bg-[#d1afa9]', 'bg-[#ceb7b4]', 'bg-[#e3ccc0]', 'bg-[#d8bbb2]'][index]}`}>
@@ -241,8 +260,8 @@ function LookPanel({ selectedLook, setSelectedLook, selectedColour, setSelectedC
       </div>
       <aside className="h-fit rounded-2xl bg-[#f0e1db] p-6">
         <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#a3636b]">Your selection</p>
-        <div className="my-7 flex items-center gap-4"><div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#d9b9af] text-[#6c494a]"><Scissors size={24} strokeWidth={1.2} /></div><div><h3 className="font-editorial text-2xl text-[#493538]">{selectedLook.name}</h3><p className="mt-1 text-xs text-[#806e69]">{selectedColour} · {selectedLook.texture}</p></div></div>
-        <p className="border-t border-[#d8beb5] pt-5 text-sm leading-6 text-[#806e69]">A preview tuned to your photo, your chosen texture and the way this cut moves.</p>
+         <div className="my-7 flex items-center gap-4"><div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#d9b9af] text-[#6c494a]"><Scissors size={24} strokeWidth={1.2} /></div><div><h3 className="font-editorial text-2xl text-[#493538]">{selectedLook.name}</h3><p className="mt-1 text-xs text-[#806e69]">{gender === 'male' ? 'Male' : 'Female'} · {selectedColour} · {selectedLook.texture}</p></div></div>
+         <p className="border-t border-[#d8beb5] pt-5 text-sm leading-6 text-[#806e69]">The preview places a strand-rendered hair shape over the head, tuned to the selected presentation, cut, texture and colour.</p>
         <div className="mt-7 flex gap-2"><button onClick={onBack} className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d5b9b0] text-[#745154] transition hover:bg-[#f8ebe6]" data-testid="button-back-upload" aria-label="Back to upload"><ChevronLeft size={17} /></button><button onClick={onGenerate} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[#b66f78] px-4 py-3 text-[11px] font-semibold uppercase tracking-[.14em] text-white transition hover:bg-[#a35e68]" data-testid="button-generate-preview">Generate preview <Sparkles size={14} /></button></div>
       </aside>
     </div>
@@ -260,7 +279,23 @@ function Processing({ look, colour }: { look: Look; colour: string }) {
   </div>;
 }
 
-function Compare({ image, look, colour, onReset, onToast }: { image: string; look: Look; colour: string; onReset: () => void; onToast: (message: string) => void }) {
+function HairOverlay({ gender, look, colour }: { gender: Gender; look: Look; colour: string }) {
+  const fill = hairHex(colour);
+  const highlight = colour === 'Honey Blonde' ? '#f0c98d' : colour === 'Chestnut' ? '#b2785e' : '#8a5f58';
+  const female = gender === 'female';
+  const long = ['waves', 'sleek', 'curls'].includes(look.id);
+  const bob = look.id === 'bob';
+  return <svg className="pointer-events-none absolute inset-0 z-[2] h-full w-full" viewBox="0 0 900 1100" preserveAspectRatio="xMidYMid slice" aria-label={`${gender} ${look.name} hair overlay`}>
+    <defs><linearGradient id="hair-shine" x1="0" x2="1"><stop offset="0" stopColor={fill} /><stop offset=".45" stopColor={highlight} stopOpacity=".72" /><stop offset="1" stopColor={fill} /></linearGradient></defs>
+    <path d={female ? (long ? 'M255 430C205 245 290 102 448 95c180-8 257 143 205 335l-25 360c-32 122-105 204-180 238 39-176 22-340-2-478-18-102-39-173-91-196-55 24-93 103-100 196-8 113-1 275 27 478-95-54-142-160-153-294z' : 'M284 438C248 268 319 135 452 126c151-10 232 111 197 287l-30 112c-51-76-94-105-168-106-68-1-122 29-172 102z') : (bob ? 'M286 433C254 271 336 148 459 148c144 0 222 118 189 285l-16 168c-38 67-92 105-170 111-78-9-132-48-169-114z' : 'M312 433C278 274 353 160 460 160c126 0 199 110 173 274l-19 103c-34 58-83 89-154 96-73-9-122-41-157-100z')} fill="url(#hair-shine)" opacity=".98" />
+    <path d={female ? 'M324 317C365 186 521 148 594 295M300 354C350 235 522 204 617 341M292 399C355 306 530 286 638 405' : 'M333 316C371 224 515 194 579 294M319 363C381 286 518 271 607 352'} fill="none" stroke={highlight} strokeWidth="13" strokeLinecap="round" opacity=".56" />
+    <path d={female && long ? 'M306 445C292 620 332 793 370 916M350 438C342 635 383 823 414 962M568 431C590 600 552 806 507 964M615 438C637 606 606 764 563 900' : 'M335 443C327 546 346 629 371 694M568 436C584 527 568 624 543 687'} fill="none" stroke={highlight} strokeWidth="8" strokeLinecap="round" opacity=".45" />
+    {look.id === 'curls' && <g fill="none" stroke={highlight} strokeWidth="16" opacity=".7"><path d="M294 466c-48 76 64 96 4 168s77 100 11 177" /><path d="M620 456c58 75-58 98 1 175s-72 103-7 184" /></g>}
+    {!female && <path d="M346 226C397 164 518 158 584 228" fill="none" stroke="#1d1619" strokeWidth="24" strokeLinecap="round" opacity=".52" />}
+  </svg>;
+}
+
+function Compare({ image, look, colour, gender, onReset, onToast }: { image: string; look: Look; colour: string; gender: Gender; onReset: () => void; onToast: (message: string) => void }) {
   const [position, setPosition] = useState(52);
   const [saved, setSaved] = useState(false);
   const [bagged, setBagged] = useState(false);
@@ -275,8 +310,8 @@ function Compare({ image, look, colour, onReset, onToast }: { image: string; loo
     <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
       <div>
         <div className="relative mx-auto aspect-[4/3] max-h-[610px] overflow-hidden rounded-[1.6rem] bg-[#e9d5cc] shadow-[0_24px_70px_rgba(76,49,46,.14)]">
-          <img src={image || DEMO_IMAGE} alt="After preview" className="absolute inset-0 h-full w-full object-cover" data-testid="img-after-preview" />
-          <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${position}%` }}><img src={image || DEMO_IMAGE} alt="Before preview" className="h-full max-w-none object-cover" style={{ width: `calc(100% * ${100 / position})` }} data-testid="img-before-preview" /><div className="absolute inset-0 bg-[#c9a99e]/10" /></div>
+           <img src={image || DEMO_IMAGE} alt="After preview" className="absolute inset-0 h-full w-full object-cover" data-testid="img-after-preview" /><HairOverlay gender={gender} look={look} colour={colour} />
+           <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${position}%` }}><img src={image || DEMO_IMAGE} alt="Before preview" className="h-full max-w-none object-cover" style={{ width: `calc(100% * ${100 / position})` }} data-testid="img-before-preview" /><div className="absolute inset-0 bg-[#c9a99e]/10" /></div>
           <div className="absolute inset-y-0 z-10 w-px bg-white shadow-[0_0_0_1px_rgba(75,52,51,.18)]" style={{ left: `${position}%` }}><div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#fffaf5] text-[#594042] shadow-lg"><ChevronLeft size={14} /><ChevronRight size={14} /></div></div>
           <div className="absolute left-4 top-4 rounded-full bg-[#493538]/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.15em] text-white backdrop-blur">Before</div><div className="absolute right-4 top-4 rounded-full bg-[#fffaf5]/85 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.15em] text-[#493538] backdrop-blur">After</div>
           <input type="range" min="15" max="85" value={position} onChange={(event) => setPosition(Number(event.target.value))} className="absolute inset-0 z-20 h-full w-full cursor-ew-resize opacity-0" aria-label="Compare before and after" data-testid="input-compare-slider" />
@@ -299,6 +334,7 @@ function Compare({ image, look, colour, onReset, onToast }: { image: string; loo
 function Studio({ toast }: { toast: (message: string) => void }) {
   const [image, setImage] = useState<string | null>(null);
   const [step, setStep] = useState(1);
+  const [gender, setGender] = useState<Gender>('female');
   const [selectedLook, setSelectedLook] = useState(looks[0]);
   const [selectedColour, setSelectedColour] = useState('Dark Brown');
   const mutation = useGenerateTryOn();
@@ -307,7 +343,7 @@ function Studio({ toast }: { toast: (message: string) => void }) {
   const generate = () => {
     if (!image) return;
     setStep(3);
-    mutation.mutate({ data: { imageData: image, style: selectedLook.name, color: selectedColour } }, {
+     mutation.mutate({ data: { imageData: image, style: selectedLook.name, color: selectedColour, gender } }, {
       onSuccess: (data) => { window.setTimeout(() => { setResult(data.previewImage || image); }, 3000); },
       onError: () => { window.setTimeout(() => { setResult(image); toast('We used a local preview so you can keep exploring.'); }, 2200); },
     });
@@ -318,7 +354,7 @@ function Studio({ toast }: { toast: (message: string) => void }) {
     <div className="mx-auto max-w-[1320px]">
        <div className="mb-14 flex flex-col justify-between gap-5 border-b border-[#e2d6d0] pb-7 sm:flex-row sm:items-end"><div><p className="mb-3 text-[10px] font-semibold uppercase tracking-[.23em] text-[#b66f78]">The Lustra studio</p><h2 className="font-editorial text-4xl tracking-[-.03em] text-[#433034] sm:text-5xl">Your look, in the making.</h2></div><p className="max-w-xs text-sm leading-6 text-[#806e69]">No guesswork. Just a considered first look at what could be yours.</p></div>
       <Progress step={result ? 3 : step} />
-      {result ? <Compare image={result} look={selectedLook} colour={selectedColour} onReset={reset} onToast={toast} /> : step === 1 ? <UploadPanel image={image} onImage={(value) => setImage(value || null)} onError={toast} onNext={() => setStep(2)} /> : step === 2 ? <LookPanel selectedLook={selectedLook} setSelectedLook={setSelectedLook} selectedColour={selectedColour} setSelectedColour={setSelectedColour} onBack={() => setStep(1)} onGenerate={generate} /> : <Processing look={selectedLook} colour={selectedColour} />}
+       {result ? <Compare image={result} look={selectedLook} colour={selectedColour} gender={gender} onReset={reset} onToast={toast} /> : step === 1 ? <UploadPanel image={image} onImage={(value) => setImage(value || null)} onError={toast} onNext={() => setStep(2)} /> : step === 2 ? <LookPanel gender={gender} setGender={setGender} selectedLook={selectedLook} setSelectedLook={setSelectedLook} selectedColour={selectedColour} setSelectedColour={setSelectedColour} onBack={() => setStep(1)} onGenerate={generate} /> : <Processing look={selectedLook} colour={selectedColour} />}
       {step === 3 && !result && <button onClick={() => { setStep(2); mutation.reset(); }} className="mx-auto mt-4 flex items-center gap-2 text-xs font-semibold text-[#9b8983] hover:text-[#68484c]" data-testid="button-cancel-processing"><ChevronLeft size={14} /> Back to edit</button>}
     </div>
   </section>;

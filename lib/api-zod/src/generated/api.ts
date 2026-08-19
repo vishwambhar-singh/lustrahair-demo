@@ -29,7 +29,8 @@ export const HealthCheckResponse = zod.object({
 export const GenerateTryOnBody = zod.object({
   "imageData": zod.string().min(1),
   "style": zod.string().min(1),
-  "color": zod.string().min(1)
+  "color": zod.string().min(1),
+  "gender": zod.enum(['female', 'male'])
 })
 
 export const GenerateTryOnResponse = zod.object({

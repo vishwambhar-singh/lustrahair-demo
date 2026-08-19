@@ -11,7 +11,7 @@ router.post("/try-on", (req, res) => {
     return;
   }
 
-  const { imageData, style, color } = parsed.data;
+  const { imageData, style, color, gender } = parsed.data;
   const providerConfigured = Boolean(process.env.TRY_ON_PROVIDER_URL);
 
   // The prototype keeps the fallback intentionally honest: it returns the
@@ -21,8 +21,8 @@ router.post("/try-on", (req, res) => {
     previewImage: imageData,
     mode: providerConfigured ? "provider" : "simulation",
     message: providerConfigured
-      ? `Preview created for ${style} in ${color}.`
-      : `Preview simulation created for ${style} in ${color}.`,
+      ? `Preview created for ${gender} ${style} in ${color}.`
+      : `Preview simulation created for ${gender} ${style} in ${color}.`,
   });
 
   res.json(result);

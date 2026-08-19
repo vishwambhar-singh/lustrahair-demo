@@ -9,6 +9,14 @@ export interface HealthStatus {
   status: string;
 }
 
+export type TryOnInputGender = typeof TryOnInputGender[keyof typeof TryOnInputGender];
+
+
+export const TryOnInputGender = {
+  female: 'female',
+  male: 'male',
+} as const;
+
 export interface TryOnInput {
   /** @minLength 1 */
   imageData: string;
@@ -16,6 +24,7 @@ export interface TryOnInput {
   style: string;
   /** @minLength 1 */
   color: string;
+  gender: TryOnInputGender;
 }
 
 export type TryOnResultMode = typeof TryOnResultMode[keyof typeof TryOnResultMode];
