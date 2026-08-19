@@ -25,27 +25,11 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Router as WouterRouter, Route, Switch, useLocation } from 'wouter';
+import demoPortrait from '@assets/lustrahair-demo.jpg';
 
 const queryClient = new QueryClient();
 
-const DEMO_IMAGE = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-<svg width="900" height="1100" viewBox="0 0 900 1100" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ead4cd"/><stop offset=".55" stop-color="#f5e8e0"/><stop offset="1" stop-color="#c99591"/></linearGradient>
-    <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3b2427"/><stop offset=".45" stop-color="#684346"/><stop offset="1" stop-color="#1d171a"/></linearGradient>
-  </defs>
-  <rect width="900" height="1100" fill="url(#bg)"/>
-  <circle cx="170" cy="160" r="110" fill="#fff" opacity=".2"/><circle cx="740" cy="870" r="220" fill="#b87579" opacity=".15"/>
-  <path d="M155 1060c18-255 68-440 202-495 90-38 208-21 287 44 117 96 165 255 177 451H155z" fill="#b68578"/>
-  <path d="M285 390c-19-139 49-244 182-261 148-19 248 80 233 245l-31 166-99 66-266-56-19-160z" fill="#d69c88"/>
-  <path d="M261 393c-33-125 3-277 155-302 143-24 260 49 290 191 22 103-25 259-73 330-17-146-20-235-103-291-63-43-132-46-210-5-9 72-16 148-4 230-41-30-43-91-55-153z" fill="url(#hair)"/>
-  <path d="M586 358c42 45 78 127 76 222l-36 306c-27 64-80 104-122 137 23-169 35-354-11-513l93-152z" fill="#302022"/>
-  <path d="M268 441c-9 142 11 254 67 359-32-33-68-60-94-113-27-55-29-145 27-246z" fill="#3d272b"/>
-  <path d="M392 507c29 16 71 18 102-2-7 44-25 65-54 66-30 0-45-22-48-64z" fill="#b46e6f"/>
-  <path d="M337 453c-24 21-26 64 4 73 15 4 29-8 31-29 2-21-14-50-35-44zm170 1c23 20 27 63-3 73-16 5-29-8-32-28-2-22 14-51 35-45z" fill="#d69c88"/>
-  <path d="M375 461c31-23 72-26 111-7" fill="none" stroke="#6c4042" stroke-width="10" stroke-linecap="round"/>
-  <path d="M418 565c25 10 52 9 74-3" fill="none" stroke="#9c565c" stroke-width="7" stroke-linecap="round"/>
-</svg>`)}`;
+const DEMO_IMAGE = demoPortrait;
 
 type Look = { id: string; name: string; note: string; cut: string; texture: string };
 type Gender = 'female' | 'male';

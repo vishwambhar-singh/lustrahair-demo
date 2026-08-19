@@ -81,6 +81,8 @@ To connect a production image-to-image provider:
 
 The prototype does not persist uploaded images to a database. A production implementation should obtain explicit consent, clearly describe provider processing, delete source and generated images on a defined schedule, encrypt data in transit and at rest, and avoid sending images to a model provider without the user's knowledge.
 
+The built-in demo uses a local real-person portrait asset so the experience can be evaluated without uploading a photo. Replace that asset with a properly licensed brand-owned image before production.
+
 ## Production roadmap
 
 1. Secure image storage with short-lived access URLs and automatic deletion.

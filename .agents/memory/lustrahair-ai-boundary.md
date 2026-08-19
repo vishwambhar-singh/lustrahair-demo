@@ -8,3 +8,5 @@ The try-on experience should preserve a provider-neutral server contract, clearl
 **Why:** The first release must be usable without secrets or a model account, while shoppers should not be misled into believing the fallback is photorealistic AI.
 
 **How to apply:** Keep provider credentials server-side, validate the existing input/output shape at the API boundary, pass the `gender` selection through to a future model adapter, and add storage, consent, moderation, queueing, retries, and evaluation before enabling real traffic.
+
+The no-setup demo should use a real, properly licensed portrait asset rather than an illustration, because visual try-on quality is judged from the demo path first.
