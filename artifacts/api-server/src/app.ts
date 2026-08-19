@@ -31,4 +31,12 @@ app.use(express.urlencoded({ extended: true, limit: '12mb' }));
 
 app.use("/api", router);
 
+app.get("/", (_req, res) => {
+  res.json({
+    name: "LustraHair API",
+    version: "0.1.0",
+    endpoints: ["/api/healthz", "/api/try-on"],
+  });
+});
+
 export default app;
