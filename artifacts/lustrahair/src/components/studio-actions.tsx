@@ -225,14 +225,18 @@ export function CommerceProvider({ children, toast }: { children: ReactNode; toa
   };
 
   const downloadPreview = () => {
-    const canvas = document.querySelector<HTMLCanvasElement>('[data-testid="img-after-preview"]');
-    if (!canvas) {
+    const afterEl = document.querySelector<HTMLCanvasElement | HTMLImageElement>('[data-testid="img-after-preview"]');
+    if (!afterEl) {
       toast('Generate a preview first, then download.');
       return;
     }
     const link = document.createElement('a');
     link.download = `lustra-${shareLookRef?.lookId || 'preview'}.png`;
-    link.href = canvas.toDataURL('image/png');
+    if (afterEl instanceof HTMLCanvasElement) {
+      link.href = afterEl.toDataURL('image/png');
+    } else {
+      link.href = afterEl.src;
+    }
     link.click();
     toast('Preview image downloaded.');
   };

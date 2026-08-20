@@ -31,27 +31,51 @@ import { Router as WouterRouter, Route, Switch, useLocation } from 'wouter';
 const queryClient = new QueryClient();
 const DEMO_IMAGE = DEMO_PHOTO;
 
-type Look = { id: string; name: string; note: string; cut: string; texture: string };
+type Look = { id: string; name: string; note: string; description: string; cut: string; texture: string };
 type Gender = 'female' | 'male';
 
 const looks: Look[] = [
-  { id: 'waves', name: 'Signature Waves', note: 'Soft movement, unmistakably you.', cut: 'Long', texture: 'Wavy' },
-  { id: 'sleek', name: 'Sleek Length', note: 'Polished from every angle.', cut: 'Long', texture: 'Straight' },
-  { id: 'curls', name: 'Soft Curls', note: 'A little more romance.', cut: 'Long', texture: 'Curly' },
-  { id: 'bob', name: 'Modern Bob', note: 'The confident reset.', cut: 'Short', texture: 'Straight' },
-  { id: 'layers', name: 'Feathered Layers', note: 'Airy volume with a point of view.', cut: 'Medium', texture: 'Wavy' },
-  { id: 'bangs', name: 'Curtain Bangs', note: 'Frame the moment.', cut: 'Medium', texture: 'Wavy' },
+  { id: 'waves', name: 'Signature Waves', note: 'Soft movement, unmistakably you.', description: 'soft, voluminous waves with natural movement', cut: 'Long', texture: 'Wavy' },
+  { id: 'sleek', name: 'Sleek Length', note: 'Polished from every angle.', description: 'sleek, straight hair with a glossy polished finish', cut: 'Long', texture: 'Straight' },
+  { id: 'curls', name: 'Soft Curls', note: 'A little more romance.', description: 'soft, bouncy curls with natural definition', cut: 'Long', texture: 'Curly' },
+  { id: 'bob', name: 'Modern Bob', note: 'The confident reset.', description: 'a sharp, modern bob with clean lines and movement', cut: 'Short', texture: 'Straight' },
+  { id: 'layers', name: 'Feathered Layers', note: 'Airy volume with a point of view.', description: 'feathered layers with soft volume and textured ends', cut: 'Medium', texture: 'Wavy' },
+  { id: 'bangs', name: 'Curtain Bangs', note: 'Frame the moment.', description: 'soft curtain bangs that blend into the rest of the hair', cut: 'Medium', texture: 'Wavy' },
 ];
 
-const colours = [
-  { name: 'Black', hex: '#211c1d' },
-  { name: 'Dark Brown', hex: '#49322b' },
-  { name: 'Chestnut', hex: '#86584a' },
-  { name: 'Honey Blonde', hex: '#c89558' },
+type Colour = { name: string; hex: string; description: string };
+
+const colours: Colour[] = [
+  { name: 'Black', hex: '#211c1d', description: 'deep, natural black with subtle depth and shine' },
+  { name: 'Dark Brown', hex: '#49322b', description: 'warm dark brown, photographed hair with natural highlights, not flat colour' },
+  { name: 'Chestnut', hex: '#86584a', description: 'rich chestnut brown with warm golden undertones' },
+  { name: 'Honey Blonde', hex: '#c89558', description: 'luminous honey blonde with sun-kissed dimension and natural variation' },
 ];
 
 function hairHex(colour: string) {
   return colours.find((item) => item.name === colour)?.hex ?? '#49322b';
+}
+
+declare global {
+  interface Window {
+    puter?: {
+      ai: {
+        txt2img: (prompt: string, options?: {
+          model?: string;
+          input_image?: string;
+          input_image_mime_type?: string;
+        }) => Promise<HTMLImageElement>;
+      };
+    };
+  }
+}
+
+function buildTryOnPrompt(hairstyle: Look, color: Colour, gender: Gender): string {
+  return `Analyze the uploaded photo. Preserve this person's exact facial identity, face shape, skin tone, expression, pose, and the original background and lighting. If the person has little or no visible hair, naturally add a full head of hair in the requested style as if it were their real hair. If they already have hair, replace it entirely with the requested style — do not blend with existing hair color or length.
+
+Apply this look: ${hairstyle.name} — ${hairstyle.description}, in ${color.name} (${color.description}). Style it naturally for a ${gender} presentation unless the style itself implies otherwise. Render it as real photographed human hair with natural strand detail, shine, and volume appropriate to the style — not a flat colour tint or wig-like overlay.
+
+Do not alter facial features, body, outfit, or accessories. Match the original photo's lighting direction and colour temperature so the hair looks like part of the same photograph, not a composite. Output only the edited photo, no text or borders.`;
 }
 
 function Logo({ light = false }: { light?: boolean }) {
@@ -300,7 +324,7 @@ function Processing({ look, colour }: { look: Look; colour: string }) {
   );
 }
 
-function Compare({ image, look, colour, setColour, gender, onReset, onChangeLook }: { image: string; look: Look; colour: string; setColour: (colour: string) => void; gender: Gender; onReset: () => void; onChangeLook: () => void }) {
+function Compare({ image, look, colour, setColour, gender, onReset, onChangeLook, resultImage }: { image: string; look: Look; colour: string; setColour: (colour: string) => void; gender: Gender; onReset: () => void; onChangeLook: () => void; resultImage: string | null; }) {
   const [position, setPosition] = useState(52);
   return (
     <div className="mx-auto max-w-6xl">
@@ -315,7 +339,11 @@ function Compare({ image, look, colour, setColour, gender, onReset, onChangeLook
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <div>
           <div className="relative mx-auto aspect-[4/3] max-h-[610px] overflow-hidden rounded-[1.6rem] bg-[#e9d5cc] shadow-[0_24px_70px_rgba(76,49,46,.14)]">
-            <HairPreview photo={image || DEMO_IMAGE} lookId={look.id} colourHex={hairHex(colour)} colourName={colour} gender={gender} className="absolute inset-0 z-[2] h-full w-full" testId="img-after-preview" />
+            {resultImage ? (
+              <img src={resultImage} alt="AI preview" className="absolute inset-0 z-[2] h-full w-full object-cover" data-testid="img-after-preview" />
+            ) : (
+              <HairPreview photo={image || DEMO_IMAGE} lookId={look.id} colourHex={hairHex(colour)} colourName={colour} gender={gender} className="absolute inset-0 z-[2] h-full w-full" testId="img-after-preview" />
+            )}
             <div className="absolute inset-y-0 left-0 z-[3] overflow-hidden" style={{ width: `${position}%` }}>
               <img src={image || DEMO_IMAGE} alt="Before preview" className="h-full max-w-none object-cover" style={{ width: `calc(100% * ${100 / position})` }} data-testid="img-before-preview" />
             </div>
@@ -367,6 +395,10 @@ function Studio({ toast }: { toast: (message: string) => void }) {
   const [selectedColour, setSelectedColour] = useState('Dark Brown');
   const mutation = useGenerateTryOn();
   const [ready, setReady] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [generatedCache, setGeneratedCache] = useState<Record<string, string>>({});
   const start = () => { setStep(1); document.getElementById('studio')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   useEffect(() => {
     const shared = lookFromSearch();
@@ -387,20 +419,59 @@ function Studio({ toast }: { toast: (message: string) => void }) {
     setStep(2);
     consumeRestore();
   }, [restoreLook, consumeRestore]);
-  const generate = () => {
+  const generate = async () => {
     if (!image) return;
+    if (image === DEMO_IMAGE) {
+      setStep(3);
+      setReady(false);
+      mutation.mutate(
+        { data: { imageData: image, style: selectedLook.name, color: selectedColour, gender } },
+        {
+          onSuccess: () => { window.setTimeout(() => setReady(true), 1800); },
+          onError: () => { window.setTimeout(() => { setReady(true); toast('Preview ready on this device.'); }, 1400); },
+        },
+      );
+      return;
+    }
+    const cacheKey = `${selectedLook.id}-${selectedColour}-${gender}`;
+    if (generatedCache[cacheKey]) {
+      setGeneratedImage(generatedCache[cacheKey]);
+      setStep(3);
+      setReady(false);
+      setGenerateError(null);
+      window.setTimeout(() => setReady(true), 600);
+      return;
+    }
     setStep(3);
     setReady(false);
-    mutation.mutate(
-      { data: { imageData: image, style: selectedLook.name, color: selectedColour, gender } },
-      {
-        onSuccess: () => { window.setTimeout(() => setReady(true), 1800); },
-        onError: () => { window.setTimeout(() => { setReady(true); toast('Preview ready on this device.'); }, 1400); },
-      },
-    );
+    setIsGenerating(true);
+    setGenerateError(null);
+    try {
+      const colour = colours.find((item) => item.name === selectedColour);
+      if (!colour) throw new Error('Something went wrong generating your preview');
+      const builtPrompt = buildTryOnPrompt(selectedLook, colour, gender);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 20000));
+      const result = await Promise.race([
+        (window as any).puter?.ai?.txt2img(builtPrompt, {
+          model: 'google/gemini-2.5-flash-image',
+          input_image: image,
+        }),
+        timeoutPromise,
+      ]) as HTMLImageElement;
+      const resultImageBase64 = result.src;
+      setGeneratedImage(resultImageBase64);
+      setGeneratedCache((prev) => ({ ...prev, [cacheKey]: resultImageBase64 }));
+      window.setTimeout(() => setReady(true), 600);
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : 'Something went wrong generating your preview');
+      setReady(true);
+    } finally {
+      setIsGenerating(false);
+    }
   };
-  const reset = () => { setReady(false); setImage(null); setStep(1); start(); };
+  const reset = () => { setReady(false); setImage(null); setGeneratedImage(null); setGeneratedCache({}); setGenerateError(null); setStep(1); start(); };
   const changeLook = () => { setReady(false); setStep(2); };
+  const retryGenerate = () => generate();
   return (
     <section id="studio" className="scroll-mt-8 bg-[#f8f5f0] px-5 py-24 lg:px-10 lg:py-32">
       <div className="mx-auto max-w-[1320px]">
@@ -413,15 +484,26 @@ function Studio({ toast }: { toast: (message: string) => void }) {
         </div>
         <Progress step={ready ? 3 : step} />
         {ready && image ? (
-          <Compare image={image} look={selectedLook} colour={selectedColour} setColour={setSelectedColour} gender={gender} onReset={reset} onChangeLook={changeLook} />
+          generateError ? (
+            <div className="mx-auto flex max-w-md flex-col items-center py-16 text-center sm:py-24">
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f3e3dd] text-[#a3636b]"><Info size={28} strokeWidth={1.5} /></div>
+              <p className="text-[10px] font-semibold uppercase tracking-[.22em] text-[#b66f78]">Preview unavailable</p>
+              <h3 className="mt-3 font-editorial text-3xl text-[#433034]">Something went wrong generating your preview</h3>
+              <p className="mt-3 text-sm leading-6 text-[#806e69]">{generateError}</p>
+              <button onClick={retryGenerate} className="mt-8 flex items-center gap-2 rounded-full bg-[#b66f78] px-6 py-3 text-[11px] font-semibold uppercase tracking-[.14em] text-white transition hover:bg-[#a35e68]" data-testid="button-retry-preview">Retry</button>
+              <button onClick={() => { setReady(false); setGenerateError(null); setStep(2); }} className="mt-3 text-[11px] font-semibold text-[#9b8983] hover:text-[#68484c]" data-testid="button-back-edit">Back to edit</button>
+            </div>
+          ) : (
+            <Compare image={image} look={selectedLook} colour={selectedColour} setColour={setSelectedColour} gender={gender} onReset={reset} onChangeLook={changeLook} resultImage={generatedImage} />
+          )
         ) : step === 1 ? (
-          <UploadPanel image={image} onImage={(value) => setImage(value || null)} onError={toast} onNext={() => setStep(2)} />
+          <UploadPanel image={image} onImage={(value) => { setImage(value || null); if (value && value !== DEMO_IMAGE) { setGeneratedImage(null); setGeneratedCache({}); } else if (!value) { setGeneratedImage(null); setGeneratedCache({}); } }} onError={toast} onNext={() => setStep(2)} />
         ) : step === 2 ? (
           <LookPanel gender={gender} setGender={setGender} selectedLook={selectedLook} setSelectedLook={setSelectedLook} selectedColour={selectedColour} setSelectedColour={setSelectedColour} onBack={() => setStep(1)} onGenerate={generate} />
         ) : (
           <Processing look={selectedLook} colour={selectedColour} />
         )}
-        {step === 3 && !ready && <button onClick={() => { setStep(2); mutation.reset(); }} className="mx-auto mt-4 flex items-center gap-2 text-xs font-semibold text-[#9b8983] hover:text-[#68484c]" data-testid="button-cancel-processing"><ChevronLeft size={14} /> Back to edit</button>}
+        {step === 3 && !ready && <button onClick={() => { setStep(2); mutation.reset(); setGenerateError(null); }} className="mx-auto mt-4 flex items-center gap-2 text-xs font-semibold text-[#9b8983] hover:text-[#68484c]" data-testid="button-cancel-processing"><ChevronLeft size={14} /> Back to edit</button>}
       </div>
     </section>
   );
